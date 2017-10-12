@@ -1,3 +1,23 @@
+## Aviso
+Devido ao tempo pré-definido para este curso (6 horas), não utilizaremos os padrões repository e service layer, mas ao 
+final do curso explicarei o motivo de utilizá-los em seus projetos no dia a dia.
+
+## Requisitos para este curso
+As máquinas do laboratório possuem os requisitos para este curso instalados, por isso recomendo a utilização das mesmas 
+para melhor aproveitamento das poucas horas de curso.
+- php >= 7
+- mariadb ou mysql
+- composer
+## Iniciando com o composer
+Composer é o gerenciador de dependências do php, assim como o maven gerencia as dependências de projetos java por exemplo.
+Uma dependência pode ser um pacote de geração de tabelas, boletos, integração com meios de pagamento, enfim, pacotes 
+úteis feitos por terceiros que podem ser integrados ao nosso projeto de forma simples e rápida.
+
+Vamos criar um projeto laravel com o seguinte comando:
+```
+composer create-project laravel/laravel miniCMS
+```
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">
