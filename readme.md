@@ -13,9 +13,25 @@ Composer é o gerenciador de dependências do php, assim como o maven gerencia a
 Uma dependência pode ser um pacote de geração de tabelas, boletos, integração com meios de pagamento, enfim, pacotes 
 úteis feitos por terceiros que podem ser integrados ao nosso projeto de forma simples e rápida.
 
-Vamos criar um projeto laravel com o seguinte comando:
+- Abra o terminal no linux ou git bash no windows.
+- Navegue até o diretório que deseja (cd ~/Desktop por exemplo)
+- Vamos criar um projeto laravel com o seguinte comando:
+
 ```
 composer create-project laravel/laravel miniCMS
+```
+
+- Ao final da instalação, você verá algo parecido com:
+
+```
+Writing lock file
+Generating autoload files
+> Illuminate\Foundation\ComposerScripts::postAutoloadDump
+> @php artisan package:discover
+Discovered Package: fideloper/proxy
+Discovered Package: laravel/tinker
+Package manifest generated successfully.
+> @php artisan key:generate Application key [base64:T4OQTrIb1A8skRQH5y8B+LDAQZK6JXSkWrC9ma7/2co=] set successfully.
 ```
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
