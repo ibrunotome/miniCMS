@@ -62,6 +62,22 @@ DB_USERNAME=root
 DB_PASSWORD=root
 ```
 
+## Criação do banco de dados
+
+Essa parte é muito simples, apenas criaremos o banco (Schema), e depos o laravel cuidará da estrutura do banco com as 
+migrations.
+
+- Se estiver no terminal do linux/mac, utilize os comandos:
+```
+mysql -uroot -p
+
+root
+
+create database cms;
+```
+- Digite ctrl + d para sair
+- Ou se preferir, abra o workbench e crie o banco por lá
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">
