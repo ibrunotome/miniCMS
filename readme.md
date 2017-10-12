@@ -13,7 +13,7 @@ Composer é o gerenciador de dependências do php, assim como o maven gerencia a
 Uma dependência pode ser um pacote de geração de tabelas, boletos, integração com meios de pagamento, enfim, pacotes 
 úteis feitos por terceiros que podem ser integrados ao nosso projeto de forma simples e rápida.
 
-- Abra o terminal no linux ou git bash no windows.
+- Abra o terminal no linux/mac ou git bash no windows.
 - Navegue até o diretório que deseja (cd ~/Desktop por exemplo)
 - Vamos criar um projeto laravel com o seguinte comando:
 
@@ -32,6 +32,34 @@ Discovered Package: fideloper/proxy
 Discovered Package: laravel/tinker
 Package manifest generated successfully.
 > @php artisan key:generate Application key [base64:T4OQTrIb1A8skRQH5y8B+LDAQZK6JXSkWrC9ma7/2co=] set successfully.
+```
+
+
+- Entre no diretório da aplicação com o comando abaixo utilizando o terminal no linux/mac ou git bash no windows.
+
+```
+cd miniCMS
+```
+## Arquivo .env
+
+O arquivo .env contém as informações sensíveis do sistema como credências de acesso ao banco de dados, além de 
+variáveis de ambiente como nome e url da aplicação, definição se a aplicação está em modo local ou em produção, e 
+outros.
+
+Não é recomendado que este arquivo seja commitado, então existe uma cópia dele com o nome .env.example, com informações 
+genéricas que iremos sobreescrever.
+
+- Copie o arquivo e salve com o nome .env
+- Ex. no terminal ou git bash:
+```
+cp .env.example .env
+```
+
+- Abra o arquivo em seu editor de código ou nano/vim no terminal e edite as informações como abaixo:
+```
+DB_DATABASE=cms
+DB_USERNAME=root
+DB_PASSWORD=root
 ```
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
