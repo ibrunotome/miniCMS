@@ -1,6 +1,6 @@
 ## Aviso
-Devido ao tempo pré-definido para este curso (6 horas), não utilizaremos os padrões repository e service layer, mas ao 
-final do curso explicarei o motivo de utilizá-los em seus projetos no dia a dia.
+Devido ao tempo pré-definido para este curso (6 horas), não utilizaremos o padrão repository, mas ao 
+final do curso explicarei o motivo de utilizá-lo nos projetos pessoais e de recomendá-lo.
 
 ## Requisitos para este curso
 As máquinas do laboratório possuem os requisitos para este curso instalados, por isso recomendo a utilização das mesmas 
@@ -36,17 +36,17 @@ Package manifest generated successfully.
 
 
 - Entre no diretório da aplicação com o comando abaixo utilizando o terminal no linux/mac ou git bash no windows.
-
 ```
 cd miniCMS
 ```
+
 ## Arquivo .env
 
 O arquivo .env contém as informações sensíveis do sistema como credências de acesso ao banco de dados, além de 
 variáveis de ambiente como nome e url da aplicação, definição se a aplicação está em modo local ou em produção, e 
 outros.
 
-Não é recomendado que este arquivo seja commitado, então existe uma cópia dele com o nome .env.example, com informações 
+Não é recomendado que este arquivo seja comitado, existe uma cópia dele com o nome .env.example com informações 
 genéricas que iremos sobreescrever.
 
 - Copie o arquivo e salve com o nome .env
@@ -61,6 +61,24 @@ DB_DATABASE=cms
 DB_USERNAME=root
 DB_PASSWORD=root
 ```
+
+## Checando instalação
+
+Feito os passos acima, criamos uma chave para nossa aplicação com o comando:
+
+```
+php artisan key:generate
+```
+
+e rodamos o servidor com o comando:
+
+
+```
+php artisan serve
+```
+
+O servidor será iniciado no endereço http://localhost:8000, acesse-o e veja a tela de apresentação do Laravel.
+
 
 ## Criação do banco de dados
 
@@ -77,6 +95,22 @@ create database cms;
 ```
 - Digite ctrl + d para sair
 - Ou se preferir, abra o workbench e crie o banco por lá
+
+## Criação do login
+
+```
+php artisan make:auth
+```
+
+Rodando o comando acima na raiz do projeto você verá todo o processo de autenticação e recuperação de senha foi criado.
+O comando abaixo irá rodas as migrations disponíveis (duas foram criadas com o comando make:auth, a tabela de usuário e 
+de redefinição de senha). As migrations são o controle de versões do banco de dados.
+
+```
+php artisan migrate
+```
+
+Acesse http://localhost:8000 novamente
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
