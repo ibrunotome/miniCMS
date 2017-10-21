@@ -112,6 +112,62 @@ php artisan migrate
 
 Acesse http://localhost:8000 novamente
 
+## A aplicação 
+
+Estamos criando um mini cms (gestor de conteúdo, como o Wordpress por exemplo), nessas 6 horas iremos criar a 
+gestão de usuários, categorias e posts.
+
+## Criando categories
+
+Como dito anteriormente, gerenciamos/versionamos as tabelas do banco de dados com as migrations. Para criar a migration 
+da tabela categories, utilizamos o seguinte comando na raiz do projeto:
+
+```
+php artisan make:migration create_categories_table
+```
+
+Um arquivo será criado dentro de database/migrations com o padrão Y-m-d-timestamp_crate_tabela_table.php.
+
+Abra-o com seu editor de código e vamos editar os campos da nova tabela categories.
+
+Acrescente o campo "name" na migration, limitando o campo a 50 caracteres. Sua migration deve ficar assim:
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateCategoriesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name', 50);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('categories');
+    }
+}
+
+```
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">
