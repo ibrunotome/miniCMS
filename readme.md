@@ -216,7 +216,7 @@ use Faker\Generator as Faker;
 
 $factory->define(App\Category::class, function (Faker $faker) {
     return [
-        'name' => $faker->word
+        'name' => $faker->unique()->word
     ];
 });
 
@@ -334,6 +334,378 @@ Migrated:  2017_10_21_165117_create_categories_table
 Seeding: CategoriesTableSeeder
 Seeding: UsersTableSeeder
 ```
+
+## Rotas e controllers
+
+O Laravel utiliza por padrão a arquitetura Model, View, Controller (MVC). Já criamos o modelo Category, ainda temos que 
+criar as visões de interação e também editar o controller que foi criado automaticamente no momento em que rodamos o comando
+php artisan make:model Category --all
+
+A visão solicitará dados ao controller, que irá interagir com o model e devolver os dados de volta para a visão, porém 
+o responsável pela ligação entre a camada view e controller ainda não foi editado, as rotas. A partir delas conseguimos 
+entender todas as possíveis ações em nossa aplicação, veja abaixo:
+
+```php
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+```
+
+É fácil entender o comportamento da aplicação pelo seu arquivo de rotas, no exemplo acima por exemplo, vemos que se a 
+rota (url) for vazia (http://localhost:8000 em localhost, ou seudominio.x em produção), uma tela de boas vindas será chamada. 
+Já se a url /home for chamada, a função index dentro de HomeController será encarregada de algo.
+
+Vamos editar as rotas para que somente usuários logados possam interagir com as categorias. Edite o arquivo routes/web.php 
+adicionando o seguinte conteúdo:
+
+```php
+Route::group(['middleware' => 'auth:web'], function () {
+    Route::resource('categories', 'CategoryController', ['except' => 'show']);
+});
+
+```
+
+Ou seja, usuários autenticados podem requisitar todo o resource (CRUD) localizado dentro de app/Http/Controllers/CategoriesController.php 
+
+Abra o arquivo e veja que ele já possui um início da implementação dos métodos necessários para o CRUD, removemos a função 
+show que serve apenas para exibição individual dos dados, então teremos as seguintes funções no arquivo:
+
+- **index:** Listar o conteúdo da tabela categories.
+- **create:** Retorna uma view que contém um formulário para criar uma category.
+- **store:** Armazena no banco de dados uma nova category.
+- **show:** Exibe individualmente uma categoria, podemos apagar essa função neste mini curso, pois não a utilizaremos.
+- **edit:** Retorna uma view que contém um formulário para editar uma category.
+- **update:** Atualiza uma category no banco de dados.
+- **destroy:** Apaga uma category do banco de dados.
+
+Como podemos ver, os métodos estão em branco, cabe a nós escolhermos a melhor maneira de implementá-los de acordo com a demanda.
+
+Vamos começar a desenvolver os métodos.
+
+## index
+
+Primeiro acesse a url http://localhost:8000/categories, você verá uma tela em branco, pois o método index não contém nada, 
+então vamos começar a retornar alguns dados para a tela. Vamos pegar todos os dados da tabela categories e retorná-los.
+
+```php
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $categories = Category::all();
+
+        return $categories;
+    }
+```
+
+Acesse novamente a url http://localhost:8000/categories, você verá todas as categorias cadastradas na tela, em formato json.
+Cabe ao desenvolvedor criar uma interface para consumir esses dados no frontend. Mas o ponto aqui é, vejam como foi fácil 
+capturar os dados do banco de dados, sem escrever uma única consulta mysql, pois quem cuidou disso foi o ORM eloquent.
+
+Se houvessem milhares de categorias no banco de dados, ficaria inviável exibir todas ao mesmo tempo, então vamos substituir o 
+método all() por:
+
+```
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $categories = Category::with([])->paginate();
+
+        return $categories;
+    }
+```
+
+Acesse novamente a url http://localhost:8000/categories, agora temos uma paginação em todos os dados. Porém queremos mesmo é 
+listar todas essas categorias numa tabela, com campo de pesquisa e tudo mais, felizmente já existe um pacote gratuito 
+que utiliza o datatables.net para exibir os dados, o pacote criado pelo usuário Yajra pode ser adicionado rodando os seguintes 
+comandos na raiz do projeto:
+
+```
+composer require yajra/laravel-datatables-buttons
+composer require yajra/laravel-datatables-oracle
+php artisan vendor:publish
+```
+
+No último comando, utiliza a opção 0 para publicar todos os providers.
+
+Vamos criar uma datatable para a tabela categories.
+
+```
+php artisan datatables:make Category --model
+```
+
+Vamos substituir o método index que implementamos anteriormente, pela chamada da datatable.
+
+```php
+    /**
+     * Display a listing of the resource.
+     *
+     * @param CategoryDataTable $dataTable
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(CategoryDataTable $dataTable)
+    {
+        return $dataTable->render('layouts.categories.list');
+    }
+```
+
+Edite o conteúdo do arquivo app/DataTables/CategoryDataTable.php como abaixo:
+
+```php
+<?php
+
+namespace App\DataTables;
+
+use App\Category;
+use Yajra\DataTables\Services\DataTable;
+
+class CategoryDataTable extends DataTable
+{
+    /**
+     * Build DataTable class.
+     *
+     * @param mixed $query Results from query() method.
+     * @return \Yajra\DataTables\DataTableAbstract
+     */
+    public function dataTable($query)
+    {
+        return datatables($query)
+            ->addColumn('action', function (Category $model) {
+                return '<a href="/categories/' . $model->id . '/edit">Editar</a>';
+            });
+    }
+
+    /**
+     * Get query source of dataTable.
+     *
+     * @param \App\Category $model
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function query(Category $model)
+    {
+        return $model->newQuery()->select($this->getColumns());
+    }
+
+    /**
+     * Optional method if you want to use html builder.
+     *
+     * @return \Yajra\DataTables\Html\Builder
+     */
+    public function html()
+    {
+        return $this->builder()
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            ->addAction(['width' => '80px'])
+            ->parameters($this->getBuilderParameters());
+    }
+
+    /**
+     * Get columns.
+     *
+     * @return array
+     */
+    protected function getColumns()
+    {
+        return [
+            'id',
+            'name',
+            'created_at',
+            'updated_at'
+        ];
+    }
+
+    /**
+     * Get filename for export.
+     *
+     * @return string
+     */
+    protected function filename()
+    {
+        return 'category_' . time();
+    }
+}
+
+```
+
+Apenas adicionamos uma url para edição na tabela.
+
+Se tentarmos acessar a url novamente, veremos um erro nos avisando que a view categories/list não existe. Vamos criá-la 
+em resources/views/layouts/categories/list.blade.php
+
+```blade
+@extends('layouts.app')
+
+@push('stylesheets')
+    <link href="{{ asset('css/datatables/dataTables.buttons.min.css') }}"
+          rel="stylesheet">
+    <link href="{{ asset('css/datatables/dataTables.responsive.min.css') }}"
+          rel="stylesheet">
+@endpush
+
+@section('content')
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Categorias</div>
+
+                    <div class="panel-body">
+                        @if (session('status'))
+                            <div class="alert alert-success">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if($errors->any())
+                            @foreach ($errors->all() as $error)
+                                <div class="has-error">{{ $error }}</div>
+                            @endforeach
+                        @endif
+
+                        {!! $dataTable->table() !!}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('js/datatables/dataTables.jquery.min.js') }}"></script>
+    <script src="{{ asset('js/datatables/dataTables.bootstrap.min.js') }}"></script>
+    <script src="{{ asset('js/datatables/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('js/datatables/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/buttons.server-side.js') }}"></script>
+
+    {!! $dataTable->scripts() !!}
+@endpush
+```
+Podemos ver que a tabela requisita alguns assets (Css e js) que ainda não temos no projeto, devido a questão de curto 
+tempo para esse minicurso, utilize-as prontas a partir do link abaixo:
+
+**Pasta public:** https://www.dropbox.com/sh/srqsbxdy17mczub/AACbX6S6b50G2Tumh3QfoFrha?dl=0
+
+Adicione as scripts e stylesheets no arquivo resources/views/layouts/app.blade.php
+
+```blade
+<!DOCTYPE html>
+<html lang="{{ app()->getLocale() }}">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Styles -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @stack('stylesheets')
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+
+                    <!-- Collapsed Hamburger -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                        <span class="sr-only">Toggle Navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- Branding Image -->
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                    <!-- Left Side Of Navbar -->
+                    <ul class="nav navbar-nav">
+                        &nbsp;
+                    </ul>
+
+                    <!-- Right Side Of Navbar -->
+                    <ul class="nav navbar-nav navbar-right">
+                        <!-- Authentication Links -->
+                        @guest
+                            <li><a href="{{ route('login') }}">Login</a></li>
+                            <li><a href="{{ route('register') }}">Register</a></li>
+                        @else
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                    {{ Auth::user()->name }} <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="{{ route('logout') }}"
+                                            onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                            Logout
+                                        </a>
+
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                            {{ csrf_field() }}
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        @yield('content')
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ asset('js/app.js') }}"></script>
+    @stack('scripts')
+</body>
+</html>
+
+```
+
+Acesse http://localhost:8000/categories, uma tabela com todas as categorias será exibida, com funções de busca, ordenação e exportação já inclusas.
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">

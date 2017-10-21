@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\DataTables\CategoryDataTable;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -10,11 +11,13 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param CategoryDataTable $dataTable
+     *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(CategoryDataTable $dataTable)
     {
-        //
+        return $dataTable->render('layouts.categories.list');
     }
 
     /**
@@ -34,17 +37,6 @@ class CategoryController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Category $category
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Category $category)
     {
         //
     }
