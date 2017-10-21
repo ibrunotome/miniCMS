@@ -255,7 +255,62 @@ class CategoriesTableSeeder extends Seeder
 }
 ```
 
+Vamos aproveitar e criar uma seed para nosso usuário, pois não queremos ter que cadastrá-lo a cada refresh no banco de dados.
+
+```
+php artisan make:seed UsersTableSeeder
+```
+
+Abra o arquivo criado database/seeds/CategoriesTableSeeder.php e edite-o para que ele faça a chamada da factory criada 
+anteriormente:
+
+```php
+<?php
+
+use App\User;
+use Illuminate\Database\Seeder;
+
+class UsersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        factory(User::class)->create([
+            'name'     => 'Bruno Tomé',
+            'email'    => 'ibrunotome@gmail.com',
+            'password' => bcrypt('secretxxx')
+        ]);
+    }
+}
+
+```
+
 Por fim, chame essa seeder e todas as outras que criar posteriormente, no arquivo database/seeds/DatabaseSeeder.php
+
+```php
+<?php
+
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $this->call(CategoriesTableSeeder::class);
+        $this->call(UsersTableSeeder::class);
+    }
+}
+
+```
 
 Pronto, podemos testar agora se a migration será executada corretamente, rode o seguinte comando:
 
@@ -277,6 +332,7 @@ Migrated:  2014_10_12_100000_create_password_resets_table
 Migrating: 2017_10_21_165117_create_categories_table
 Migrated:  2017_10_21_165117_create_categories_table
 Seeding: CategoriesTableSeeder
+Seeding: UsersTableSeeder
 ```
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
