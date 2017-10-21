@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\DataTables\CategoryDataTable;
+use App\Http\Requests\CategoryCreateRequest;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -27,18 +28,22 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('layouts.categories.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param CategoryCreateRequest|Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryCreateRequest $request)
     {
-        //
+        $data = $request->all();
+
+        Category::create($data);
+
+        return redirect(route('categories.index'));
     }
 
     /**

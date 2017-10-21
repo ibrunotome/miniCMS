@@ -150,7 +150,7 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 50);
+            $table->string('name', 50)->unique();
             $table->timestamps();
         });
     }
@@ -633,78 +633,223 @@ Adicione as scripts e stylesheets no arquivo resources/views/layouts/app.blade.p
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     @stack('stylesheets')
 </head>
 <body>
-    <div id="app">
-        <nav class="navbar navbar-default navbar-static-top">
-            <div class="container">
-                <div class="navbar-header">
+<div id="app">
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
 
-                    <!-- Collapsed Hamburger -->
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
-                        <span class="sr-only">Toggle Navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
+                <!-- Collapsed Hamburger -->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#app-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
 
-                    <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
-                    </a>
-                </div>
+                <!-- Branding Image -->
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    {{ config('app.name', 'Laravel') }}
+                </a>
+            </div>
 
-                <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="nav navbar-nav">
-                        &nbsp;
-                    </ul>
+            <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                <!-- Left Side Of Navbar -->
+                <ul class="nav navbar-nav">
+                    &nbsp;
+                </ul>
 
-                    <!-- Right Side Of Navbar -->
-                    <ul class="nav navbar-nav navbar-right">
-                        <!-- Authentication Links -->
-                        @guest
-                            <li><a href="{{ route('login') }}">Login</a></li>
-                            <li><a href="{{ route('register') }}">Register</a></li>
+                <!-- Right Side Of Navbar -->
+                <ul class="nav navbar-nav navbar-right">
+                    <!-- Authentication Links -->
+                    @guest
+                        <li><a href="{{ route('login') }}">Login</a></li>
+                        <li><a href="{{ route('register') }}">Register</a></li>
                         @else
+                            <li class="{{ request()->is('categories') ? 'active' : '' }}"><a
+                                        href="{{ route('categories.index') }}">Categorias</a></li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                                   aria-expanded="false">
                                     {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
 
                                 <ul class="dropdown-menu" role="menu">
                                     <li>
                                         <a href="{{ route('logout') }}"
-                                            onclick="event.preventDefault();
+                                           onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                             Logout
                                         </a>
 
-                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                              style="display: none;">
                                             {{ csrf_field() }}
                                         </form>
                                     </li>
                                 </ul>
                             </li>
-                        @endguest
-                    </ul>
-                </div>
+                            @endguest
+                </ul>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        @yield('content')
-    </div>
+    @yield('content')
+</div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    @stack('scripts')
+<!-- Scripts -->
+<script src="{{ asset('js/app.js') }}"></script>
+@stack('scripts')
 </body>
 </html>
-
 ```
 
 Acesse http://localhost:8000/categories, uma tabela com todas as categorias será exibida, com funções de busca, ordenação e exportação já inclusas.
+
+Agora vamos implementar a opção de criar uma nova categoria, altere a função no CategoryController para:
+
+```php
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('layouts.categories.create');
+    }
+```
+
+Ela apenas retorna uma view, crie-a ao lado da list.blade.php, com o nome create.blade.php
+
+```blade
+@extends('layouts.app')
+
+@section('content')
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Categorias - Adicionar</div>
+
+                    <div class="panel-body">
+                        @if (session('status'))
+                            <div class="alert alert-success">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if($errors->any())
+                            @foreach ($errors->all() as $error)
+                                <li class="text-danger">{{ $error }}</li>
+                            @endforeach
+                        @endif
+
+                        <form method="post" action="{{ route('categories.store') }}">
+                            {{ csrf_field() }}
+                            @include('layouts.components.name')
+                            @include('layouts.components.save-button')
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+```
+
+Ele inclui dois componentes, crie-os em resources/views/components
+
+**name.blade.php**
+```blade
+<label for="name">Nome</label>
+<div class="input-group">
+    <span class="input-group-addon"><i class="fa fa-edit"></i></span>
+    <input type="text"
+           id="name"
+           name="name"
+           class="form-control"
+           placeholder="Nome"
+           value="{{ old('name') }}"
+           required>
+</div>
+```
+
+**save-button.blade.php**
+```blade
+<br>
+<button type="submit" class="btn btn-success pull-right" value="Salvar">Salvar</button>
+```
+
+Temos a view pronta, agora temos que criar a função de store. Vamos validar os dados antes de salvá-los no banco de dados, 
+faremos isso na request.
+
+```
+php artisan make:request CategoryCreateRequest
+```
+
+Abra o arquivo criado app/Http/Requests/CategoryCreateRequest.php e faça a seguinte validação, autorizando a criação de uma 
+categoria apenas quando o nome foi passado como parâmetro, tendo no máximo 50 caracteres.
+
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class CategoryCreateRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name' => 'required|string|max:50'
+        ];
+    }
+}
+
+```
+
+Agora vamos ao controller criar nossa função de store.
+
+```php
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param CategoryCreateRequest|Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(CategoryCreateRequest $request)
+    {
+        $data = $request->all();
+
+        Category::create($data);
+
+        return redirect(route('categories.index'));
+    }
+```
+
+Teste se tudo funcionou.
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
