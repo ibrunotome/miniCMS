@@ -119,11 +119,11 @@ gestão de usuários, categorias e posts.
 
 ## Criando categories
 
-Como dito anteriormente, gerenciamos/versionamos as tabelas do banco de dados com as migrations. Para criar a migration 
-da tabela categories, utilizamos o seguinte comando na raiz do projeto:
+Vamos criar a entidade Category e todos os outros recursos que precisaremos, como o controller, a migration e a sua 
+factory com um só comando:
 
 ```
-php artisan make:migration create_categories_table
+php artisan make:model Category --all
 ```
 
 Um arquivo será criado dentro de database/migrations com o padrão Y-m-d-timestamp_crate_tabela_table.php.
@@ -168,6 +168,116 @@ class CreateCategoriesTable extends Migration
 
 ```
 
+E pronto, já temos nossa estrutura para a tabela categories. Agora vamos preencher o modelo, abra o arquivo app/Category.php 
+e preencha o array $fillable com os campos que podem ser preenchidos via formulário, ou seja, com o campo name que 
+criamos anteriormente.
+
+```php
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * Class Category
+ *
+ * @package App
+ *
+ * @property int id
+ * @property string name
+ * @property \DateTime created_at
+ * @property \DateTime updated_at
+ */
+class Category extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name'
+    ];
+}
+
+```
+
+Já temos o modelo e a tabela prontas, agora vamos configurar nossa factory, essa camada utiliza o Faker para geração de 
+dados fakes em nossa aplicação, economizando horas de preenchimento manual. Juntamente com a seeds (sementes), popularemos 
+o banco de dados com dezenas de categorias para efetuarmos nosssos testes.
+
+Abra o arquivo database/factories/CategoryFactory.php e edite-o da seguinte maneira:
+
+```php
+<?php
+
+use Faker\Generator as Faker;
+
+$factory->define(App\Category::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word
+    ];
+});
+
+```
+
+O campo name será preenchido com alguma palavra aleatória, já os campos id, created_at e updated_at serão preenchidos 
+automaticamente com o autoincrement e a data atual respectivamente.
+
+Agora vamos ciar uma seeder para que ela chame a factory criada anteriormente e então popule a tabela no banco de dados 
+com dados fakes.
+
+```
+php artisan make:seed CategoriesTableSeeder
+```
+
+Abra o arquivo criado database/seeds/CategoriesTableSeeder.php e edite-o para que ele faça a chamada da factory criada 
+anteriormente:
+
+```php
+<?php
+
+use App\Category;
+use Illuminate\Database\Seeder;
+
+class CategoriesTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        factory(Category::class, 20)->create();
+    }
+}
+```
+
+Por fim, chame essa seeder e todas as outras que criar posteriormente, no arquivo database/seeds/DatabaseSeeder.php
+
+Pronto, podemos testar agora se a migration será executada corretamente, rode o seguinte comando:
+
+```
+php artisan migrate:fresh --seed
+```
+
+*Atenção*, o comando acima irá apagar todas as tabelas, recriá-las e semear os dados fakes.
+
+Se uma mensagem parecida com a abaixo aparecer, tudo ocorreu como queremos.
+
+```
+Dropped all tables successfully.
+Migration table created successfully.
+Migrating: 2014_10_12_000000_create_users_table
+Migrated:  2014_10_12_000000_create_users_table
+Migrating: 2014_10_12_100000_create_password_resets_table
+Migrated:  2014_10_12_100000_create_password_resets_table
+Migrating: 2017_10_21_165117_create_categories_table
+Migrated:  2017_10_21_165117_create_categories_table
+Seeding: CategoriesTableSeeder
+```
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">
