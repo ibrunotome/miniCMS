@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Category;
 use App\DataTables\CategoryDataTable;
 use App\Http\Requests\CategoryCreateRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -35,6 +36,7 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      *
      * @param CategoryCreateRequest|Request $request
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(CategoryCreateRequest $request)
@@ -43,6 +45,8 @@ class CategoryController extends Controller
 
         Category::create($data);
 
+        session()->flash('status', 'Categoria criada com sucesso!');
+
         return redirect(route('categories.index'));
     }
 
@@ -50,23 +54,31 @@ class CategoryController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Category $category
+     *
      * @return \Illuminate\Http\Response
      */
     public function edit(Category $category)
     {
-        //
+        return view('layouts.categories.edit', compact('category'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param CategoryUpdateRequest|Request $request
      * @param  \App\Category $category
+     *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryUpdateRequest $request, Category $category)
     {
-        //
+        $data = $request->all();
+
+        $category->update($data);
+
+        session()->flash('status', 'Categoria editada com sucesso!');
+
+        return redirect(route('categories.index'));
     }
 
     /**

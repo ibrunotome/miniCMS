@@ -6,6 +6,6 @@
            name="name"
            class="form-control"
            placeholder="Nome"
-           value="{{ old('name') }}"
+           value="{{ old('name') ?? $data->name ?? null }}"
            required>
 </div>

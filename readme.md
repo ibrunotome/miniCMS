@@ -576,24 +576,22 @@ em resources/views/layouts/categories/list.blade.php
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
+                @if (session('status'))
+                    <div class="alert alert-success">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    @foreach ($errors->all() as $error)
+                        <div class="has-error">{{ $error }}</div>
+                    @endforeach
+                @endif
                 <div class="panel panel-default">
                     <div class="panel-heading">Categorias</div>
 
                     <div class="panel-body">
-                        @if (session('status'))
-                            <div class="alert alert-success">
-                                {{ session('status') }}
-                            </div>
-                        @endif
-
-                        @if($errors->any())
-                            @foreach ($errors->all() as $error)
-                                <div class="has-error">{{ $error }}</div>
-                            @endforeach
-                        @endif
-
                         {!! $dataTable->table() !!}
-
                     </div>
                 </div>
             </div>
@@ -711,6 +709,8 @@ Adicione as scripts e stylesheets no arquivo resources/views/layouts/app.blade.p
 
 Acesse http://localhost:8000/categories, uma tabela com todas as categorias será exibida, com funções de busca, ordenação e exportação já inclusas.
 
+## create
+
 Agora vamos implementar a opção de criar uma nova categoria, altere a função no CategoryController para:
 
 ```php
@@ -734,22 +734,21 @@ Ela apenas retorna uma view, crie-a ao lado da list.blade.php, com o nome create
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
+                @if (session('status'))
+                    <div class="alert alert-success">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    @foreach ($errors->all() as $error)
+                        <li class="text-danger">{{ $error }}</li>
+                    @endforeach
+                @endif
                 <div class="panel panel-default">
                     <div class="panel-heading">Categorias - Adicionar</div>
 
                     <div class="panel-body">
-                        @if (session('status'))
-                            <div class="alert alert-success">
-                                {{ session('status') }}
-                            </div>
-                        @endif
-
-                        @if($errors->any())
-                            @foreach ($errors->all() as $error)
-                                <li class="text-danger">{{ $error }}</li>
-                            @endforeach
-                        @endif
-
                         <form method="post" action="{{ route('categories.store') }}">
                             {{ csrf_field() }}
                             @include('layouts.components.name')
@@ -830,7 +829,9 @@ class CategoryCreateRequest extends FormRequest
 
 ```
 
-Agora vamos ao controller criar nossa função de store.
+## store
+
+Agora vamos ao controller criar nossa função de store, que armazenará a categoria no banco de dados.
 
 ```php
     /**
@@ -845,11 +846,96 @@ Agora vamos ao controller criar nossa função de store.
 
         Category::create($data);
 
+        session()->flash('status', 'Categoria criada com sucesso!');
+
         return redirect(route('categories.index'));
     }
 ```
 
 Teste se tudo funcionou.
+
+## edit
+
+Altere a função edit do controller para:
+
+```php
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Category $category
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Category $category)
+    {
+        return view('layouts.categories.edit', compact('category'));
+    }
+``` 
+
+O laravel irá pegar o id contido na rota (ex: categories/18/edit) e automaticamente buscar a categoria com essa id no 
+banco de dados. Então basta devolvermos a variável para a view usando um compact.
+
+Crie uma CategoryUpdateRequest.
+
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class CategoryUpdateRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        $id = request()->segment(2);
+
+        return [
+            'name' => 'required|string|max:50|unique:categories,name,' . $id
+        ];
+    }
+}
+```
+
+## update
+
+Por fim, altere o método update para:
+
+```php
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param CategoryUpdateRequest|Request $request
+     * @param  \App\Category $category
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function update(CategoryUpdateRequest $request, Category $category)
+    {
+        $data = $request->all();
+
+        $category->update($data);
+
+        session()->flash('status', 'Categoria editada com sucesso!');
+
+        return redirect(route('categories.index'));
+    }
+```
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 

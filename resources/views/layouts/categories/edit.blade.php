@@ -16,12 +16,13 @@
                     @endforeach
                 @endif
                 <div class="panel panel-default">
-                    <div class="panel-heading">Categorias - Adicionar</div>
+                    <div class="panel-heading">Categorias - Editar</div>
 
                     <div class="panel-body">
-                        <form method="post" action="{{ route('categories.store') }}">
+                        <form method="post" action="{{ route('categories.update', $category) }}">
                             {{ csrf_field() }}
-                            @include('layouts.components.name')
+                            {{ method_field('PUT') }}
+                            @include('layouts.components.name', ['data' => $category])
                             @include('layouts.components.save-button')
                         </form>
                     </div>
