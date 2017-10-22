@@ -937,6 +937,127 @@ Por fim, altere o método update para:
     }
 ```
 
+## destroy
+
+Para utilizarmos o método destroy seguindo as requests no formate RESTful, devemos enviar o método DELETE na requisição.
+Altere o CategoryDataTable para:
+
+```php
+<?php
+
+namespace App\DataTables;
+
+use App\Category;
+use Yajra\DataTables\Services\DataTable;
+
+class CategoryDataTable extends DataTable
+{
+    /**
+     * Build DataTable class.
+     *
+     * @param mixed $query Results from query() method.
+     * @return \Yajra\DataTables\DataTableAbstract
+     */
+    public function dataTable($query)
+    {
+        return datatables($query)
+            ->addColumn('action', function (Category $model) {
+                return view('layouts.components.categories-actions', compact('model'))->render();
+            });
+    }
+
+    /**
+     * Get query source of dataTable.
+     *
+     * @param \App\Category $model
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function query(Category $model)
+    {
+        return $model->newQuery()->select($this->getColumns());
+    }
+
+    /**
+     * Optional method if you want to use html builder.
+     *
+     * @return \Yajra\DataTables\Html\Builder
+     */
+    public function html()
+    {
+        return $this->builder()
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            ->addAction(['width' => '80px'])
+            ->parameters($this->getBuilderParameters());
+    }
+
+    /**
+     * Get columns.
+     *
+     * @return array
+     */
+    protected function getColumns()
+    {
+        return [
+            'id',
+            'name',
+            'created_at',
+            'updated_at'
+        ];
+    }
+
+    /**
+     * Get filename for export.
+     *
+     * @return string
+     */
+    protected function filename()
+    {
+        return 'category_' . time();
+    }
+}
+```
+
+Crie o componente categories-actions.blade.php na pasta components.
+
+```blade
+<a href="{{ route('categories.edit', $model) }}" class="label label-sm label-warning" title="Editar"><i class="fa fa-edit"></i></a>
+<a href="{{ route('categories.destroy', $model) }}"
+   class="label label-sm label-danger"
+   title="Deletar"
+   onclick="event.preventDefault();document.getElementById('delete-form').submit();">
+    <i class="fa fa-times"></i>
+</a>
+
+<form id="delete-form" action="{{ route('categories.destroy', $model) }}" method="POST"
+      style="display: none;">
+    {{ csrf_field() }}
+    {{ method_field('DELETE') }}
+</form>
+```
+
+Por fim, altere o método delete no controller para:
+
+```php
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Category $category
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Category $category)
+    {
+        Category::destroy($category->id);
+
+        session()->flash('status', 'Categoria deletada com sucesso!');
+
+        return redirect(route('categories.index'));
+    }
+```
+
+Finalizamos o crud de categorias.
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">

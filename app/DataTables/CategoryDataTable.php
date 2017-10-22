@@ -17,7 +17,7 @@ class CategoryDataTable extends DataTable
     {
         return datatables($query)
             ->addColumn('action', function (Category $model) {
-                return '<a href="/categories/' . $model->id . '/edit">Editar</a>';
+                return view('layouts.components.categories-actions', compact('model'))->render();
             });
     }
 
