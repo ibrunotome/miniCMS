@@ -1058,6 +1058,56 @@ Por fim, altere o método delete no controller para:
 
 Finalizamos o crud de categorias.
 
+##########################################################
+**Criem um CRUD de posts, basicamente o mesmo processo que fizemos para as categories, os campos da tabela serão**
+
+```php
+$table->string('title', 100);
+$table->text('description');
+```
+
+##########################################################
+
+## Dicas para usar em projetos
+
+Por questões de pouco tempo não é possível mostrar muita coisa, segue abaixo dicas de como estruturar o projeto para que 
+ele se torne mais escalável.
+
+- **Service Layer:** Camada de serviços, abstraia seus métodos de store e update para essa camada. Basta criar uma pasta 
+Services dentro de app/. E nela criar suas services. Um exemplo seria PostService.php, e nessa classe os métodos de store e 
+update com os devidos tratamentos de erros, podendo ainda disparar notificações a partir desses métodos.
+
+- **Notifications:** Pasta localizada em app/ com o intuito de reunir todas as classes de notificações do projeto. Uma notificação 
+pode ser disparada em momentos como: Saldo baixo, um novo usuário se registrou, um usuário solicitou reset de senha, ocorreu uma exception no sistema.
+
+- **Repository Layer:** Camada para abstração do banco de dados, criando um reaproveitamento de código muito maior e ainda tornando 
+possível a troca de ORM de forma mais rápida.
+
+- **Jobs:** Trabalhos que são muito demorados, podem ser jogados em filas, o Laravel faz isso muito bem, você dispara um job, ele
+executa em background e depois você pode analizar facilmente os resultados, se foram positivos ou se o job falhou.
+
+- **Horizon:** O horizon possui uma dashboard para analizar os jobs ditos acima. Do mesmo criador do Laravel.
+Ex: https://www.dropbox.com/s/aoa8fb0yiwjhjlf/Screenshot%202017-10-25%2000.23.35.png?dl=0
+
+Também utilizando horizon e as queues (filas), um bom exemplo que posso dar é que com as configurações certas no redis, 
+conseguimos gerar 35 mil boletos na celulaweb, em 4 minutos e meio.
+
+Com o estudo e implementação correta do que está acima, é possível criar aplicações rápidas e escaláveis, mas isso é só a base, como diz 
+um ditado "a cada dia 23 novos frameworks javascript são criados", esse ditado também serve para "a cada dia surgem 23 novas soluções/novidades" no ramo. 
+
+## Dicas de estudo
+
+O mini curso foi muito simples, 6 horas não dá pra mostrar quase nada e ainda não dá pra mostrar da forma "correta" como nos items acima, 
+pra aprender Laravel de verdade recomendo os links abaixo:
+
+- Laracasts ($9 mês, en_US): https://laracasts.com
+- SchoolOfNet (R$ 30 mês, pt_BR): https://schoolofnet.com
+- CodeEducation (Preços únicos (800 + - reais), porém são projetos práticos, pt_BR): https://code.education
+- CodeCasts (Grátis, pt_BR): https://www.youtube.com/channel/UCTluPqMkm90zyw6mCde561A/playlists 
+- Laravel Brasil no facebook: https://www.facebook.com/groups/laravelbrasil/
+
+# Fim
+
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 <p align="center">
