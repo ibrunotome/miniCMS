@@ -1058,15 +1058,38 @@ Por fim, altere o método delete no controller para:
 
 Finalizamos o crud de categorias.
 
-##########################################################
 **Criem um CRUD de posts, basicamente o mesmo processo que fizemos para as categories, os campos da tabela serão**
 
 ```php
 $table->string('title', 100);
 $table->text('description');
+$table->unsignedInteger('category_id');
+$table->foreign('category_id')->references('id')->on('categories');
 ```
 
-##########################################################
+**E no modelo App\Post existirá um relacionamento:**
+
+public function category() {
+    return $this->hasOne('App\Category', 'id', 'category_id');
+}
+
+**E no modelo App\Category existirá um relacionamento:**
+
+public function posts() {
+    return $this->belongsToMany('App\Post');
+}
+
+**Como realizar queries com o relacionamento**
+
+Na query, adicione o campo with.
+
+$category = Category::with('posts')->get();
+
+O resultado será todas as categorias com todos os seus posts aninhados.
+
+$post = Post::with('category')->get();
+
+O resultado será todos os posts com sua categoria aninhada.
 
 ## Dicas para usar em projetos
 
@@ -1100,6 +1123,7 @@ um ditado "a cada dia 23 novos frameworks javascript são criados", esse ditado 
 O mini curso foi muito simples, 6 horas não dá pra mostrar quase nada e ainda não dá pra mostrar da forma "correta" como nos items acima, 
 pra aprender Laravel de verdade recomendo os links abaixo:
 
+- Laravel (Grátis): https://laravel.com/docs/master/
 - Laracasts ($9 mês, en_US): https://laracasts.com
 - SchoolOfNet (R$ 30 mês, pt_BR): https://schoolofnet.com
 - CodeEducation (Preços únicos (800 + - reais), porém são projetos práticos, pt_BR): https://code.education
