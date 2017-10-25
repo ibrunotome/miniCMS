@@ -23,5 +23,11 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::group(['middleware' => 'auth:web'], function () {
-    Route::resource('categories', 'CategoryController', ['except' => 'show']);
+    Route::resource('categories', 'CategoryController', [
+        'except' => [
+            'show',
+            'destroy'
+        ]
+    ]);
+    Route::get('categories/{id}/destroy', 'CategoryController@destroy')->name('categories.destroy');
 });

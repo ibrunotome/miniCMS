@@ -1116,11 +1116,47 @@ executa em background e depois você pode analizar facilmente os resultados, se 
 - **Horizon:** O horizon possui uma dashboard para analizar os jobs ditos acima. Do mesmo criador do Laravel.
 Ex: https://www.dropbox.com/s/aoa8fb0yiwjhjlf/Screenshot%202017-10-25%2000.23.35.png?dl=0
 
+- **Redis:** Redis é um servidor muito utilizado para gerenciar cache, sessions e as queues da aplicação. É muito rápido 
+pois gerencia tudo na memória.
+
 Também utilizando horizon e as queues (filas), um bom exemplo que posso dar é que com as configurações certas no redis, 
 conseguimos gerar 35 mil boletos na celulaweb, em 4 minutos e meio.
 
 Com o estudo e implementação correta do que está acima, é possível criar aplicações rápidas e escaláveis, mas isso é só a base, como diz 
 um ditado "a cada dia 23 novos frameworks javascript são criados", esse ditado também serve para "a cada dia surgem 23 novas soluções/novidades" no ramo. 
+
+**NÃO leve para produção projetos com apenas o conteúdo que foi mostrado no minicurso, ou seja, projetos sem camadas auxiliares como 
+as mostradas acima, e sem o devido tratamento de erros, o que não fizemos nesse minicurso.**
+
+## Dica de IDE
+
+- **PhpStorm:** Para mim não há melhor, é paga porém você como estudante pode solicitar uma licença de 1 ano (ou enquanto estudar) em https://www.jetbrains.com/student/
+
+
+## Dica de como colocar em produção
+
+**Servidor**
+- Digital Ocean: https://www.digitalocean.com
+- Linode: https://www.linode.com
+- Vultr: https://www.vultr.com
+
+## Colocando em produção
+
+### Configurações do servidor
+
+* CentOS 7
+* Nginx
+* Php 7
+* Zend OpCache
+* Redis
+* MariaDB
+* Supervisor
+
+### OneInStack
+
+Para instalar nginx, php7, zend opcache, redis e mariadb, pode-se utilizar o script oneinstack:
+
+https://github.com/lj2007331/oneinstack
 
 ## Dicas de estudo
 
