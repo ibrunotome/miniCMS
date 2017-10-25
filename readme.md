@@ -1069,15 +1069,19 @@ $table->foreign('category_id')->references('id')->on('categories');
 
 **E no modelo App\Post existirá um relacionamento:**
 
+```php
 public function category() {
     return $this->hasOne('App\Category', 'id', 'category_id');
 }
+```
 
 **E no modelo App\Category existirá um relacionamento:**
 
+```php
 public function posts() {
     return $this->belongsToMany('App\Post');
 }
+```
 
 **Como realizar queries com o relacionamento**
 
